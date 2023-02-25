@@ -2,6 +2,8 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+// error NotOwner();
+
 interface IERC20Token {
     function transfer(address, uint256) external returns (bool);
 
@@ -38,7 +40,23 @@ contract Marketplace {
         uint sold;
     }
 
+    struct BoughtItem {
+        string name;
+        string image;
+        string description;
+        string location;
+        uint price;
+    }
+
     mapping(uint => Product) internal products;
+    mapping(address => BoughtItem[]) internal s_boughtItems;
+
+    // modifier isOwner(uint _index, address caller) {
+    //     if (caller != products[_index].owner) {
+    //         revert NotOwner();
+    //     }
+    //     _;
+    // }
 
     function writeProduct(
         string memory _name,
@@ -96,9 +114,36 @@ contract Marketplace {
             "Transfer failed."
         );
         products[_index].sold++;
+
+        s_boughtItems[msg.sender].push(
+            BoughtItem(
+                products[_index].name,
+                products[_index].image,
+                products[_index].description,
+                products[_index].location,
+                products[_index].price
+            )
+        );
+    }
+
+    function removeProduct(
+        uint _indexToRemove
+    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+        delete (products[_indexToRemove]);
+    }
+
+    function updateProduct(
+        uint _indexToUpdate,
+        uint _newPrice
+    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+        products[_indexToUpdate].price = _newPrice;
     }
 
     function getProductsLength() public view returns (uint) {
         return (productsLength);
+    }
+
+    function getAllBoughtItem() public view returns (BoughtItem[] memory) {
+        return s_boughtItems[msg.sender];
     }
 }

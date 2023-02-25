@@ -6,12 +6,30 @@ import marketplaceAbi from "../contract/marketplace.abi.json";
 import erc20Abi from "../contract/erc20.abi.json";
 
 const ERC20_DECIMALS = 18;
-const MPContractAddress = "0xe0A1100887Bf2E2ECe7b9Fe443ee5b1D40Cf39be";
+const MPContractAddress = "0xd4Ba3d00F9B8dd7802E1297f0A9482b827C65a5B";
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
 
 let kit;
 let contract;
 let products = [];
+let preProducts = [];
+let temp_product = [];
+let enableSearch = false;
+
+const truncateStr = (fullStr, strLen) => {
+  if (fullStr.length <= strLen) return fullStr;
+
+  const separator = "...";
+  const seperatorLength = separator.length;
+  const charsToShow = strLen - seperatorLength;
+  const frontChars = Math.ceil(charsToShow / 2);
+  const backChars = Math.floor(charsToShow / 2);
+  return (
+    fullStr.substring(0, frontChars) +
+    separator +
+    fullStr.substring(fullStr.length - backChars)
+  );
+};
 
 const connectCeloWallet = async function () {
   if (window.celo) {
@@ -25,6 +43,11 @@ const connectCeloWallet = async function () {
 
       const accounts = await kit.web3.eth.getAccounts();
       kit.defaultAccount = accounts[0];
+
+      document.getElementById("ConnectedAddress").innerHTML = truncateStr(
+        accounts[0],
+        10
+      );
 
       contract = new kit.web3.eth.Contract(marketplaceAbi, MPContractAddress);
     } catch (error) {
@@ -60,23 +83,47 @@ const getProducts = async function () {
     });
     _products.push(_product);
   }
-  products = await Promise.all(_products);
+  preProducts = await Promise.all(_products);
+  console.log(preProducts);
+
+  for (let index = 0; index < preProducts.length; index++) {
+    console.log(preProducts[index]);
+    if (
+      preProducts[index].owner !== "0x0000000000000000000000000000000000000000"
+    ) {
+      products.push(preProducts[index]);
+      console.log("pushing");
+    }
+  }
+  console.log(products);
+
   renderProducts();
 };
 
 function renderProducts() {
   document.getElementById("marketplace").innerHTML = "";
-  products.forEach((_product) => {
-    const newDiv = document.createElement("div");
-    newDiv.className = "col-md-4";
-    newDiv.innerHTML = productTemplate(_product);
-    document.getElementById("marketplace").appendChild(newDiv);
-  });
+  if (enableSearch == false) {
+    products.forEach((_product) => {
+      const newDiv = document.createElement("div");
+      newDiv.className = "col-md-4";
+      newDiv.innerHTML = productTemplate(_product);
+      document.getElementById("marketplace").appendChild(newDiv);
+    });
+  } else {
+    temp_product.forEach((_product) => {
+      const newDiv = document.createElement("div");
+      newDiv.className = "col-12 col-sm-6 col-lg-4";
+      newDiv.innerHTML = productTemplate(_product);
+      document.getElementById("marketplace").appendChild(newDiv);
+    });
+  }
 }
 function productTemplate(_product) {
   return `
       <div class="card mb-4">
-        <img class="card-img-top" src="${_product.image}" alt="...">
+        <img class="card-img-top min-vh-75" src="${_product.image}" alt="..." 
+        data-bs-toggle="modal" data-bs-target="#myModal-${_product.index}"
+        >
         <div class="position-absolute top-0 end-0 bg-warning mt-4 px-2 py-1 rounded-start">
           ${_product.sold} Sold
         </div>
@@ -93,16 +140,62 @@ function productTemplate(_product) {
             <span>${_product.location}</span>
           </p>
           <div class="d-grid gap-2">
-            <a class="btn btn-lg btn-outline-dark buyBtn fs-6 p-3" id=${
+            <a class="btn btn-lg btn-outline-dark buyBtn fs-6 p-3" id="${
               _product.index
-            }>
-              Buy for ${_product.price
-                .shiftedBy(-ERC20_DECIMALS)
-                .toFixed(2)} cUSD
+            }">
+              Buy for ${_product.price} ${_product.price
+    .shiftedBy(-ERC20_DECIMALS)
+    .toFixed(2)} cUSD
             </a>
           </div>
         </div>
       </div>
+
+      <!-- The Modal -->
+        <div class="modal" id="myModal-${_product.index}">
+          <div class="modal-dialog">
+            <div class="modal-content">
+
+              <!-- Modal Header -->
+              <div class="modal-header">
+                <h4 class="modal-title">Information</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <!-- Modal body -->
+              <div class="modal-body">
+              <p>Rencent price: ${_product.price
+                .shiftedBy(-ERC20_DECIMALS)
+                .toFixed(2)}</p>
+              <div class="input-group mb-3">
+                <input type="number" class="form-control inputChange" placeholder="New Price" id="newPrice-${
+                  _product.index
+                }">
+                <button class="btn btn-primary applyBtn" type="submit" id="btnApply-${
+                  _product.index
+                }">Apply</button>
+              </div>
+
+
+                <div class="d-grid gap-2 my-3">
+                  <a class="btn btn-lg btn-outline-danger fs-6 p-3 deleteButton" id="btnDelete-${
+                    _product.index
+                  }"
+                    >
+                    Delete Product
+                  </a>
+                </div>
+
+                
+
+              <!-- Modal footer -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
     `;
 }
 
@@ -143,12 +236,34 @@ async function approve(_price) {
   return result;
 }
 
+async function apply(i) {
+  console.log("applying");
+}
+
 window.addEventListener("load", async () => {
   notification("⌛ Loading...");
   await connectCeloWallet();
   await getBalance();
   await getProducts();
   notificationOff();
+});
+
+document.querySelector("#searchButton").addEventListener("click", async () => {
+  console.log("searching");
+  let sr = document.getElementById("searchInput").value;
+  console.log(sr);
+  if (sr != -1) {
+    for (let index = 0; index < products.length; index++) {
+      if (products[index].name.search(sr) != -1) {
+        temp_product.push(products[index]);
+      }
+    }
+    enableSearch = true;
+    products = [];
+    await getProducts();
+  }
+  enableSearch = false;
+  temp_product = [];
 });
 
 document
@@ -175,11 +290,16 @@ document
     getProducts();
   });
 
+let n_priceValue = -99;
+let i_temp = -99;
 document.querySelector("#marketplace").addEventListener("click", async (e) => {
+  console.log(products[0].owner);
+
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id;
     notification("⌛ Waiting for payment approval...");
     try {
+      console.log(products[1].price);
       await approve(products[index].price);
     } catch (error) {
       notification(`⚠️ ${error}.`);
@@ -195,5 +315,75 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
     } catch (error) {
       notification(`⚠️ ${error}.`);
     }
+  } else if (e.target.className.includes("inputChange")) {
+    // this if to get value from input
+    document
+      .querySelector(`#${e.target.id.toString()}`)
+      .addEventListener("change", async () => {
+        n_priceValue = e.target.value;
+
+        console.log(n_priceValue);
+      });
+  } else if (e.target.className.includes("applyBtn")) {
+    // this if to get index of product
+    if (n_priceValue != 99) {
+      console.log("applying");
+      let i_index = parseInt(e.target.id.toString().slice(-1));
+      i_temp = i_index;
+
+      notification(`⌛Apllying new price...`);
+      notification("Cant update because you are not the owner!");
+    }
+  } else if (e.target.className.includes("deleteButton")) {
+    // this if to get index of product
+    console.log("Deleting item");
+    let i_index = parseInt(e.target.id.toString().slice(-1));
+    i_temp = i_index;
+
+    console.log(i_temp + "del" + preProducts[5].owner);
+
+    if (checkOwner(i_temp, preProducts[i_temp].owner)) {
+      notification(`⌛Deleting Product....`);
+      try {
+        const result = await contract.methods
+          .removeProduct(i_temp)
+          .send({ from: kit.defaultAccount });
+        notification(`🎉 `);
+        getProducts();
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
+    } else {
+      notification("Cant delete because you are not the owner!");
+    }
+  }
+
+  if (n_priceValue != -99 && i_temp != -99) {
+    if (checkOwner(i_temp, preProducts[i_temp].owner)) {
+      // this if to check whether condition to updating is true
+      try {
+        console.log("updating...");
+        const result = await contract.methods
+          .updateProduct(
+            i_temp,
+            new BigNumber(n_priceValue).shiftedBy(ERC20_DECIMALS).toString()
+          )
+          .send({ from: kit.defaultAccount });
+        notification(`🎉 `);
+        getProducts();
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
+    }
   }
 });
+
+function checkOwner(index, owner) {
+  console.log("acc: " + kit.defaultAccount);
+  console.log("owner: " + owner);
+  console.log(kit.defaultAccount.toString() == owner.toString());
+  if (kit.defaultAccount.toString() == owner.toString()) {
+    return true;
+  }
+  return false;
+}
