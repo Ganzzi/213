@@ -129,6 +129,10 @@ contract Marketplace {
     function removeProduct(
         uint _indexToRemove
     ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+        require(
+            msg.sender == products[_indexToRemove].owner,
+            "You are not the owner"
+        );
         delete (products[_indexToRemove]);
     }
 
@@ -136,6 +140,10 @@ contract Marketplace {
         uint _indexToUpdate,
         uint _newPrice
     ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+        require(
+            msg.sender == products[_indexToUpdate].owner,
+            "You are not the owner"
+        );
         products[_indexToUpdate].price = _newPrice;
     }
 
@@ -143,7 +151,9 @@ contract Marketplace {
         return (productsLength);
     }
 
-    function getAllBoughtItem() public view returns (BoughtItem[] memory) {
-        return s_boughtItems[msg.sender];
+    function getAllBoughtItem(
+        address spender
+    ) public view returns (BoughtItem[] memory) {
+        return s_boughtItems[spender];
     }
 }
