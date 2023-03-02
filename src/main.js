@@ -110,7 +110,6 @@ async function getProducts() {
     _products.push(_product);
   }
   preProducts = await Promise.all(_products);
-  // console.log(preProducts);
 
   for (let index = 0; index < preProducts.length; index++) {
     if (
@@ -119,7 +118,7 @@ async function getProducts() {
       products.push(preProducts[index]);
     }
   }
-  console.log(products);
+  
 
   renderProducts();
 }
@@ -308,7 +307,7 @@ window.addEventListener("load", async () => {
 });
 
 document.querySelector("#searchButton").addEventListener("click", async () => {
-  console.log("searching");
+  
 
   let sr = new RegExp(document.getElementById("searchInput").value, "i");
   if (sr != -1) {
@@ -374,7 +373,7 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id;
     notification("⌛ Waiting for payment approval...");
-    console.log("buying");
+
     try {
       await approve(preProducts[index].price);
     } catch (error) {
@@ -401,16 +400,14 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
   } else if (e.target.className.includes("applyBtn")) {
     // this if to get index of product
     if (n_priceValue != -99) {
-      console.log("applying");
 
       let i_index = parseInt(
         e.target.id.toString().slice(e.target.id.lastIndexOf("-") + 1)
       );
       i_temp = i_index;
       openUpdate = true;
-      console.log(i_temp, n_priceValue, openUpdate);
 
-      notification(`⌛Apllying new price...`);
+      notification(`⌛Applying new price...`);
     }
   } else if (e.target.className.includes("deleteButton")) {
     // this if to get index of product
@@ -441,7 +438,6 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
     if (checkOwner(i_temp, preProducts[i_temp].owner)) {
       // this if-statement check whether condition to updating is true
       try {
-        console.log("updating...");
         openUpdate = false;
 
         const result = await contract.methods
@@ -449,7 +445,6 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
           .send({ from: kit.defaultAccount });
         notification(`🎉 Successfully updated!`);
         i_temp = -99;
-        // console.log(products);
         await getProducts();
       } catch (error) {
         notification(`⚠️ ${error}.`);
