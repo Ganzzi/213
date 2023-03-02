@@ -78,3 +78,8 @@ Make your changes and commit them with a clear message
 Push your changes to your branch using git push origin <branch-name>
 Create a pull request on the original repository
 I welcome any contributions or feedback on this project!
+
+# Problems
+
+There is some warnings and errors that I don't know how to fit:
+![Alt text](./img/ErrorScreenshot.png "Optional title")

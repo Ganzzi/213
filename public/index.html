@@ -4,7 +4,6 @@
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 
     <!-- CSS -->
     <link
@@ -27,6 +26,12 @@
       integrity="sha256-nWBTbvxhJgjslRyuAKJHK+XcZPlCnmIAAMixz6EefVk="
       crossorigin="anonymous"
     ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/ethereum-blockies@0.1.1/blockies.min.js"></script>
 
     <style>
       :root {
@@ -55,6 +60,7 @@
         <div class="container-fluid">
           <span class="navbar-brand m-0 h4 fw-bold">Street Food SaiGon</span>
 
+          <!-- Account section -->
           <div class="nav-link">
             <span id="account" class="mx-2">
               <svg
@@ -86,6 +92,7 @@
         </div>
       </nav>
 
+      <!-- Notification section -->
       <div class="alert alert-warning sticky-top mt-2 text-center" role="alert">
         <span id="notification">⌛ Loading...</span>
       </div>
@@ -93,6 +100,7 @@
       <div class="mainContent">
         <div>
           <div class="mb-4 d-flex justify-content-between align-items-center">
+            <!-- Add-product button -->
             <div>
               <a
                 class="btn btn-dark rounded-pill"
@@ -103,6 +111,7 @@
               </a>
             </div>
 
+            <!-- Searching section -->
             <div class="d-flex mt-3 align-items-center">
               <div class="input-group mb-3">
                 <input
@@ -136,6 +145,7 @@
               </div>
             </div>
 
+            <!-- Button to see purchased product -->
             <div
               class=""
               data-bs-toggle="modal"
@@ -162,6 +172,8 @@
               </svg>
             </div>
           </div>
+
+          <!-- main section -->
           <main id="marketplace" class="row"></main>
         </div>
       </div>
@@ -253,7 +265,7 @@
       </div>
     </div>
 
-    <!-- in4 modal -->
+    <!--bought product displaying modal -->
     <div class="modal fade" id="boughItem" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -283,12 +295,5 @@
         </div>
       </div>
     </div>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://unpkg.com/ethereum-blockies@0.1.1/blockies.min.js"></script>
   </body>
 </html>
