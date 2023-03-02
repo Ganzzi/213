@@ -1,5 +1,11 @@
 # Street Food SaiGon
 
+Live Demo: https://ganzzi.github.io/Street-Food-SaiGon/
+
+![Alt text](./img/Screenshot.png "Optional title")
+
+# Desciption
+
 Welcome to Street Food SaiGon, a web application that allows users to browse and discover the best street food in SaiGon, Vietnam. This project was built as part of a coding challenge and serves as a showcase for my coding abilities.
 
 # Features
@@ -21,11 +27,16 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 - Remove product Function
 - Update product Function
 
+# Front End Functionality Added
 
+- Update product Modal with the option to update price or cancel sale
+- Conditional display by searching
+- Display user's address
+- View list of purchased product
 
 # Usage
 
-1. Install a wallet: 
+1. Install a wallet:
    - [CeloExtensionWallet](https://chrome.google.com/webstore/detail/celoextensionwallet/kkilomkmpmkbdnfelcpgckmpcaemjcdh?hl=en).
    - [MetamaskExtensionWallet](https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en).
 2. Create a wallet.
@@ -33,14 +44,16 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 4. Switch to the alfajores testnet in the CeloExtensionWallet.
 
 # Test
-Create a property.
-Create a second account in your extension wallet and send them cUSD tokens.
-Buy property with secondary account.
-Check if balance of first account increased.
-Check your wallet to see if you have the House Token
-Create another property.
-Update the price of a property that you own.
-Cancel the sale of a property you own that haven't had any sales yet
+
+1. Create a product.
+2. Create a second account in your extension wallet and send them cUSD tokens.
+3. Buy product with secondary account.
+4. Check if balance of first account increased.
+5. Add another product.
+6. Search product in the marketplace by name.
+7. Update the price of a product that you own.
+8. Cancel the sale of a product you own.
+9. View your purchased product.
 
 # Installation
 
@@ -52,12 +65,12 @@ To run the application locally, follow these steps:
 2. Move into folder: cd Street-Food-SaiGon
 3. Install: npm install or yarn install
 4. Start: npm run dev
-   
+
 ```
 
 # Contributing
-If you'd like to contribute to the project, please follow these steps:
 
+If you'd like to contribute to the project, please follow these steps:
 Fork the repository to your own GitHub account
 Clone the repository to your local machine
 Create a new branch for your feature or bug fix using git checkout -b <branch-name>
