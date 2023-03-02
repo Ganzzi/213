@@ -2,8 +2,6 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-// error NotOwner();
-
 interface IERC20Token {
     function transfer(address, uint256) external returns (bool);
 
@@ -26,6 +24,8 @@ interface IERC20Token {
 }
 
 contract Marketplace {
+    //   DECLARATION
+
     uint internal productsLength = 0;
     address internal cUsdTokenAddress =
         0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
@@ -51,13 +51,9 @@ contract Marketplace {
     mapping(uint => Product) internal products;
     mapping(address => BoughtItem[]) internal s_boughtItems;
 
-    // modifier isOwner(uint _index, address caller) {
-    //     if (caller != products[_index].owner) {
-    //         revert NotOwner();
-    //     }
-    //     _;
-    // }
+    //  FUNCTIONALITY
 
+    // function to write product to blockchain
     function writeProduct(
         string memory _name,
         string memory _image,
@@ -78,6 +74,7 @@ contract Marketplace {
         productsLength++;
     }
 
+    // function to read product
     function readProduct(
         uint _index
     )
@@ -104,6 +101,7 @@ contract Marketplace {
         );
     }
 
+    // function allow user to buy product
     function buyProduct(uint _index) public payable {
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
@@ -115,6 +113,11 @@ contract Marketplace {
         );
         products[_index].sold++;
 
+        storeBoughtItem(_index);
+    }
+
+    // function allow user to store their bought product
+    function storeBoughtItem(uint _index) private {
         s_boughtItems[msg.sender].push(
             BoughtItem(
                 products[_index].name,
@@ -126,9 +129,8 @@ contract Marketplace {
         );
     }
 
-    function removeProduct(
-        uint _indexToRemove
-    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+    // function to remove their product out of the marketplace
+    function removeProduct(uint _indexToRemove) public {
         require(
             msg.sender == products[_indexToRemove].owner,
             "You are not the owner"
@@ -136,10 +138,8 @@ contract Marketplace {
         delete (products[_indexToRemove]);
     }
 
-    function updateProduct(
-        uint _indexToUpdate,
-        uint _newPrice
-    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
+    // function to update their product's price
+    function updateProduct(uint _indexToUpdate, uint _newPrice) public {
         require(
             msg.sender == products[_indexToUpdate].owner,
             "You are not the owner"
@@ -147,10 +147,12 @@ contract Marketplace {
         products[_indexToUpdate].price = _newPrice;
     }
 
+    //  function to get the number of product added
     function getProductsLength() public view returns (uint) {
         return (productsLength);
     }
 
+    // function to get an array of item bought of each user
     function getAllBoughtItem(
         address spender
     ) public view returns (BoughtItem[] memory) {
