@@ -310,8 +310,6 @@ document.querySelector("#searchButton").addEventListener("click", async () => {
   temp_product = [];
 });
 
-let price1, price2;
-
 document
   .querySelector("#newProductBtn")
   .addEventListener("click", async (e) => {
