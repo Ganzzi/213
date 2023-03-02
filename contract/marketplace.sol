@@ -2,7 +2,6 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-// error NotOwner();
 
 interface IERC20Token {
     function transfer(address, uint256) external returns (bool);
@@ -26,10 +25,14 @@ interface IERC20Token {
 }
 
 contract Marketplace {
+
     uint internal productsLength = 0;
+
     address internal cUsdTokenAddress =
         0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 
+
+    //arrange product details together.
     struct Product {
         address payable owner;
         string name;
@@ -39,7 +42,9 @@ contract Marketplace {
         uint price;
         uint sold;
     }
-
+    
+    
+    //arrange bought item details together
     struct BoughtItem {
         string name;
         string image;
@@ -47,24 +52,34 @@ contract Marketplace {
         string location;
         uint price;
     }
-
+    
+    
+    //store products with index
     mapping(uint => Product) internal products;
+    
+    //store bought products with index
     mapping(address => BoughtItem[]) internal s_boughtItems;
 
-    // modifier isOwner(uint _index, address caller) {
-    //     if (caller != products[_index].owner) {
-    //         revert NotOwner();
-    //     }
-    //     _;
-    // }
-
+    //modifier for onlyOwner
+    modifier onlyOwner(uint _index){
+        require(msg.sender == products[_index].owner,"You are not authorized");
+        _;
+    }
+    
+    
+    //write and store the product in the store
     function writeProduct(
-        string memory _name,
-        string memory _image,
-        string memory _description,
-        string memory _location,
+        string calldata _name,
+        string calldata _image,
+        string calldata _description,
+        string calldata _location,
         uint _price
     ) public {
+        require(bytes(_name).length > 0, "Input is invalid");
+        require(bytes(_image).length > 0, "Input is invalid");
+        require(bytes(_description).length > 0, "Input is invalid");
+        require(bytes(_location).length > 0, "Input is invalid");
+        require(_price > 0, "Price is invalid");
         uint _sold = 0;
         products[productsLength] = Product(
             payable(msg.sender),
@@ -78,38 +93,32 @@ contract Marketplace {
         productsLength++;
     }
 
+
+    //read specific product from the store
     function readProduct(
         uint _index
     )
         public
         view
         returns (
-            address payable,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            uint,
-            uint
-        )
+            Product memory
+                    )
     {
         return (
-            products[_index].owner,
-            products[_index].name,
-            products[_index].image,
-            products[_index].description,
-            products[_index].location,
-            products[_index].price,
-            products[_index].sold
+            products[_index];  
         );
     }
 
+
+    //buy product from the seller
     function buyProduct(uint _index) public payable {
+        Product memory _product = products[_index];
+        require(msg.sender != _product.owner,"You can't buy your own product");
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
-                products[_index].owner,
-                products[_index].price
+                _product.owner,
+                _product.price
             ),
             "Transfer failed."
         );
@@ -117,43 +126,45 @@ contract Marketplace {
 
         s_boughtItems[msg.sender].push(
             BoughtItem(
-                products[_index].name,
-                products[_index].image,
-                products[_index].description,
-                products[_index].location,
-                products[_index].price
+                _product.name,
+                _product.image,
+                _product.description,
+                _product.location,
+                _product.price
             )
         );
     }
+    
 
+    //Owner deletes the product from the store
     function removeProduct(
         uint _indexToRemove
-    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
-        require(
-            msg.sender == products[_indexToRemove].owner,
-            "You are not the owner"
-        );
+    ) public onlyOwner(_indexToRemove) {
         delete (products[_indexToRemove]);
     }
+    
 
+    //Owner updates the price of a specific product
     function updateProduct(
         uint _indexToUpdate,
         uint _newPrice
-    ) public /*isOwner(_indexToRemove, msg.sender)*/ {
-        require(
-            msg.sender == products[_indexToUpdate].owner,
-            "You are not the owner"
-        );
+    ) public onlyOwner(_indexToUpdate){
+        require(_newPrice > 0,"Price is invalid");
         products[_indexToUpdate].price = _newPrice;
     }
+    
 
+    //get total number of products stored in the store
     function getProductsLength() public view returns (uint) {
         return (productsLength);
     }
+    
 
+    //Get all products bought by a specific buyer.
     function getAllBoughtItem(
         address spender
     ) public view returns (BoughtItem[] memory) {
         return s_boughtItems[spender];
     }
+
 }
