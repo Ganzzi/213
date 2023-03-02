@@ -1,10 +1,10 @@
 import { newKitFromWeb3 } from "@celo/contractkit";
-// import Web3 from "web3";
-const Web3 = require("web3");
-// import BigNumber from "bignumber.js";
+import Web3 from "web3";
 
 import marketplaceAbi from "../contract/marketplace.abi.json";
 import erc20Abi from "../contract/erc20.abi.json";
+
+// Declaration
 
 const ERC20_DECIMALS = 18;
 const MPContractAddress = "0x973408328976b6a59021136CfCa2Dc8CCA5440C4";
@@ -17,6 +17,11 @@ let preProducts = [];
 let temp_product = [];
 let enableSearch = false;
 let web3 = new Web3();
+let n_priceValue = -99;
+let i_temp = -99;
+let openUpdate = true;
+
+// functionality
 
 const truncateStr = (fullStr, frontChars, backChars) => {
   let separator;
@@ -84,7 +89,7 @@ async function getAllBoughtItems() {
   return boughtItems;
 }
 
-const getProducts = async function () {
+async function getProducts() {
   products = [];
   const _productsLength = await contract.methods.getProductsLength().call();
   const _products = [];
@@ -117,7 +122,7 @@ const getProducts = async function () {
   console.log(products);
 
   renderProducts();
-};
+}
 
 function renderProducts() {
   document.getElementById("marketplace").innerHTML = "";
@@ -284,17 +289,27 @@ async function approve(_price) {
   return result;
 }
 
+function checkOwner(index, owner) {
+  console.log(kit.defaultAccount, owner);
+  if (kit.defaultAccount.toString() == owner.toString()) {
+    return true;
+  }
+  return false;
+}
+
+// Even Lintener
+
 window.addEventListener("load", async () => {
   notification("⌛ Loading...");
   await connectCeloWallet();
   await getBalance();
   await getProducts();
-
   notificationOff();
 });
 
 document.querySelector("#searchButton").addEventListener("click", async () => {
   console.log("searching");
+
   let sr = new RegExp(document.getElementById("searchInput").value, "i");
   if (sr != -1) {
     for (let index = 0; index < products.length; index++) {
@@ -353,10 +368,9 @@ document.querySelector("#seeBoughtItem").addEventListener("click", async () => {
   }
 });
 
-let n_priceValue = -99;
-let i_temp = -99;
-let openUpdate = true;
 document.querySelector("#marketplace").addEventListener("click", async (e) => {
+  //  listen action when click on product card
+
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id;
     notification("⌛ Waiting for payment approval...");
@@ -422,8 +436,10 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
   }
 
   if (n_priceValue != -99 && i_temp != -99 && openUpdate) {
+    //  This is to update price
+
     if (checkOwner(i_temp, preProducts[i_temp].owner)) {
-      // this if to check whether condition to updating is true
+      // this if-statement check whether condition to updating is true
       try {
         console.log("updating...");
         openUpdate = false;
@@ -443,11 +459,3 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
     }
   }
 });
-
-function checkOwner(index, owner) {
-  console.log(kit.defaultAccount, owner);
-  if (kit.defaultAccount.toString() == owner.toString()) {
-    return true;
-  }
-  return false;
-}
