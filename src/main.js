@@ -1,13 +1,13 @@
 import { newKitFromWeb3 } from "@celo/contractkit";
 import Web3 from "web3";
 
-import marketplaceAbi from "../contract/marketplace.abi.json";
+import streetFoodAbi from "../contract/streetfood.abi.json";
 import erc20Abi from "../contract/erc20.abi.json";
 
 // Declaration
 
 const ERC20_DECIMALS = 18;
-const MPContractAddress = "0x973408328976b6a59021136CfCa2Dc8CCA5440C4";
+const StreetFoodContractAddress = "0x671878072F072bBaaca1640457DC64329fECAEe4";
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
 
 let kit;
@@ -56,7 +56,7 @@ const connectCeloWallet = async function () {
         3
       );
 
-      contract = new kit.web3.eth.Contract(marketplaceAbi, MPContractAddress);
+      contract = new kit.web3.eth.Contract(streetFoodAbi, StreetFoodContractAddress);
     } catch (error) {
       notification(`⚠️ ${error}.`);
     }
@@ -91,11 +91,12 @@ async function getAllBoughtItems() {
 
 async function getProducts() {
   products = [];
-  const _productsLength = await contract.methods.getProductsLength().call();
+  const _productsLength = await contract.methods.productsLength().call();
   const _products = [];
   for (let i = 0; i < _productsLength; i++) {
     let _product = new Promise(async (resolve, reject) => {
       let p = await contract.methods.readProduct(i).call();
+      console.log(p);
       resolve({
         index: i,
         owner: p[0],
@@ -119,8 +120,6 @@ async function getProducts() {
       products.push(preProducts[index]);
     }
   }
-  console.log(products);
-
   renderProducts();
 }
 
@@ -284,7 +283,7 @@ async function approve(_price) {
   const cUSDContract = new kit.web3.eth.Contract(erc20Abi, cUSDContractAddress);
 
   const result = await cUSDContract.methods
-    .approve(MPContractAddress, _price)
+    .approve(StreetFoodContractAddress, _price)
     .send({ from: kit.defaultAccount });
   return result;
 }
@@ -373,24 +372,29 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
 
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id;
-    notification("⌛ Waiting for payment approval...");
-    console.log("buying");
-    try {
-      await approve(preProducts[index].price);
-    } catch (error) {
-      notification(`⚠️ ${error}.`);
+    if(products[index].owner !== kit.defaultAccount) {
+      notification("⌛ Waiting for payment approval...");
+      console.log("buying");
+      try {
+        await approve(preProducts[index].price);
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
+      notification(`⌛ Awaiting payment for "${preProducts[index].name}"...`);
+      try {
+        const result = await contract.methods
+          .buyProduct(index)
+          .send({ from: kit.defaultAccount });
+        notification(`🎉 You successfully bought "${preProducts[index].name}".`);
+        await getProducts();
+        await getBalance();
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
+    } else {
+      notification(`⚠️ You can't buy your own product`);
     }
-    notification(`⌛ Awaiting payment for "${preProducts[index].name}"...`);
-    try {
-      const result = await contract.methods
-        .buyProduct(index)
-        .send({ from: kit.defaultAccount });
-      notification(`🎉 You successfully bought "${preProducts[index].name}".`);
-      await getProducts();
-      await getBalance();
-    } catch (error) {
-      notification(`⚠️ ${error}.`);
-    }
+
   } else if (e.target.className.includes("inputChange")) {
     // this if to get value from input
     document
