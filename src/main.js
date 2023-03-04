@@ -7,7 +7,7 @@ import erc20Abi from "../contract/erc20.abi.json";
 // Declaration
 
 const ERC20_DECIMALS = 18;
-const MPContractAddress = "0x973408328976b6a59021136CfCa2Dc8CCA5440C4";
+const MPContractAddress = "0xeD9f40343C4B9F4cDa915750e95610dd353dB46d";
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
 
 let kit;
@@ -373,23 +373,30 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
 
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id;
-    notification("⌛ Waiting for payment approval...");
-    console.log("buying");
-    try {
-      await approve(preProducts[index].price);
-    } catch (error) {
-      notification(`⚠️ ${error}.`);
-    }
-    notification(`⌛ Awaiting payment for "${preProducts[index].name}"...`);
-    try {
-      const result = await contract.methods
-        .buyProduct(index)
-        .send({ from: kit.defaultAccount });
-      notification(`🎉 You successfully bought "${preProducts[index].name}".`);
-      await getProducts();
-      await getBalance();
-    } catch (error) {
-      notification(`⚠️ ${error}.`);
+
+    if (checkOwner(index, preProducts[index].owner)) {
+      notification("You can not buy your own product!");
+    } else {
+      notification("⌛ Waiting for payment approval...");
+      console.log("buying");
+      try {
+        await approve(preProducts[index].price);
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
+      notification(`⌛ Awaiting payment for "${preProducts[index].name}"...`);
+      try {
+        const result = await contract.methods
+          .buyProduct(index)
+          .send({ from: kit.defaultAccount });
+        notification(
+          `🎉 You successfully bought "${preProducts[index].name}".`
+        );
+        await getProducts();
+        await getBalance();
+      } catch (error) {
+        notification(`⚠️ ${error}.`);
+      }
     }
   } else if (e.target.className.includes("inputChange")) {
     // this if to get value from input

@@ -23,6 +23,8 @@ interface IERC20Token {
     );
 }
 
+/// @title A Marketplace for Street Food in Saigon
+/// @author Ganzzi
 contract Marketplace {
     //   DECLARATION
 
@@ -49,7 +51,7 @@ contract Marketplace {
     }
 
     mapping(uint => Product) internal products;
-    mapping(address => BoughtItem[]) internal s_boughtItems;
+    mapping(address => BoughtItem[]) internal boughtItem;
 
     //modifier for onlyOwner
     modifier onlyOwner(uint _index) {
@@ -60,6 +62,13 @@ contract Marketplace {
     //  FUNCTIONALITY
 
     // function to write product to blockchain
+    /// @notice Save/store a product to the blockchain
+    /// @dev It takes the params provided, creates a Product with it and stores it in the products mapping
+    /// @param _name The name of the product
+    /// @param _image The image of the product
+    /// @param _description The description of the product
+    /// @param _location The location of the product
+    /// @param _price The price of the product
     function writeProduct(
         string calldata _name,
         string calldata _image,
@@ -85,12 +94,18 @@ contract Marketplace {
         productsLength++;
     }
 
-    // function to read product
+    /// @notice Accesses the data of a product saved on the blockchain
+    /// @dev It takes the params provided, to access a particular product from the products mapping
+    /// @param _index The index of the product stored in the products mapping
+    /// @return Product struct with all its data
     function readProduct(uint _index) public view returns (Product memory) {
         return (products[_index]);
     }
 
     // function allow user to buy product
+    /// @notice Buy a product already saved on the blockchain
+    /// @dev It takes the params provided to get access to the requested product and using the IERC20Token trasnferFrom function, transfers the price of the product from the buyer to the seller
+    /// @param _index The index of the productt
     function buyProduct(uint _index) public payable {
         Product memory _product = products[_index];
         require(msg.sender != _product.owner, "You can't buy your own product");
@@ -107,10 +122,12 @@ contract Marketplace {
         storeBoughtItem(_index);
     }
 
-    // function allow user to store their bought product
+    /// @notice Save/store a bought product
+    /// @dev It takes the param provided, to get access to the bought item and stores it in the boughtItems mapping
+    /// @param _index The index of the product
     function storeBoughtItem(uint _index) private {
         Product memory _bProduct = products[_index];
-        s_boughtItems[msg.sender].push(
+        boughtItem[msg.sender].push(
             BoughtItem(
                 _bProduct.name,
                 _bProduct.image,
@@ -121,14 +138,19 @@ contract Marketplace {
         );
     }
 
-    // function to remove their product out of the marketplace
+    /// @notice Clears the stored data of a product out of the blockchain
+    /// @dev It takes the param provided to get access to the particular product and clears its data from the products mapping
+    /// @param _indexToRemove The index of the product
     function removeProduct(
         uint _indexToRemove
     ) public onlyOwner(_indexToRemove) {
         delete (products[_indexToRemove]);
     }
 
-    // function to update their product's price
+    /// @notice Updates the price of a particular product
+    /// @dev It takes the params provided to get access to a particular product and change its price to a new price
+    /// @param _indexToUpdate The index of the product
+    /// @param _newPrice The new price of the product
     function updateProduct(
         uint _indexToUpdate,
         uint _newPrice
@@ -143,10 +165,13 @@ contract Marketplace {
         return (productsLength);
     }
 
-    // function to get an array of item bought of each user
+    /// @notice Retrieve all the items bought by a user
+    /// @dev It takes the param provided to gets access to the user's boought items stored in the boughtItems mapping
+    /// @param spender The owner of the product
+    /// @return BoughtItems array containing all the user's bought items
     function getAllBoughtItem(
         address spender
     ) public view returns (BoughtItem[] memory) {
-        return s_boughtItems[spender];
+        return boughtItem[spender];
     }
 }
