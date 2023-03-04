@@ -74,6 +74,6 @@ I welcome any contributions or feedback on this project!
 
 # Problems
 
-There is some warnings and errors that I don't know how to fit:
+There are some warnings and errors that I don't know how to fit:
 
 ![Alt text](./img/ErrorScreenshot.png "Optional title")
