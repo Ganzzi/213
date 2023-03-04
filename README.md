@@ -10,8 +10,6 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 
 # Features
 
-```
-
 1. Browse street food products by category
 2. View detailed information about each product
 3. Search for products by name 
@@ -19,8 +17,6 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 5. Buy product
 6. Edit or delete your own product entries (requires authentication)
 7. View list of purchased products
-
-```
 
 # Smart Contract Functionality Added
 
@@ -60,14 +56,10 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 
 To run the application locally, follow these steps:
 
-```
-
-1. Clone the repository to your local machine using: git clone https://github.com/Ganzzi/Street-Food-SaiGon.git
-2. Move into folder: cd Street-Food-SaiGon
-3. Install: npm install or yarn install
-4. Start: npm run dev
-
-```
+1. Clone the repository to your local machine using: ``` git clone https://github.com/Ganzzi/Street-Food-SaiGon.git ```
+2. Move into folder: ``` cd Street-Food-SaiGon ```
+3. Install: ``` npm install ``` or ``` yarn install ```
+4. Start: ``` npm run dev ```
 
 # Contributing
 
