@@ -12,12 +12,13 @@ Welcome to Street Food SaiGon, a web application that allows users to browse and
 
 ```
 
-1. Browse street food stalls by category
-2. View detailed information about each stall, including photos and reviews
-3. Leave your own reviews and ratings for stalls
-4. Search for stalls by name or category
-5. Add new stalls to the database (requires authentication)
-6. Edit or delete your own stall entries (requires authentication)
+1. Browse street food products by category
+2. View detailed information about each product
+3. Search for products by name 
+4. Add new products
+5. Buy product
+6. Edit or delete your own product entries (requires authentication)
+7. View list of purchased products
 
 ```
 
