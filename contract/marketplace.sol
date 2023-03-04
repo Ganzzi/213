@@ -51,16 +51,27 @@ contract Marketplace {
     mapping(uint => Product) internal products;
     mapping(address => BoughtItem[]) internal s_boughtItems;
 
+    //modifier for onlyOwner
+    modifier onlyOwner(uint _index) {
+        require(msg.sender == products[_index].owner, "You are not authorized");
+        _;
+    }
+
     //  FUNCTIONALITY
 
     // function to write product to blockchain
     function writeProduct(
-        string memory _name,
-        string memory _image,
-        string memory _description,
-        string memory _location,
+        string calldata _name,
+        string calldata _image,
+        string calldata _description,
+        string calldata _location,
         uint _price
     ) public {
+        require(bytes(_name).length > 0, "Input is invalid");
+        require(bytes(_image).length > 0, "Input is invalid");
+        require(bytes(_description).length > 0, "Input is invalid");
+        require(bytes(_location).length > 0, "Input is invalid");
+        require(_price > 0, "Price is invalid");
         uint _sold = 0;
         products[productsLength] = Product(
             payable(msg.sender),
@@ -75,39 +86,19 @@ contract Marketplace {
     }
 
     // function to read product
-    function readProduct(
-        uint _index
-    )
-        public
-        view
-        returns (
-            address payable,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            uint,
-            uint
-        )
-    {
-        return (
-            products[_index].owner,
-            products[_index].name,
-            products[_index].image,
-            products[_index].description,
-            products[_index].location,
-            products[_index].price,
-            products[_index].sold
-        );
+    function readProduct(uint _index) public view returns (Product memory) {
+        return (products[_index]);
     }
 
     // function allow user to buy product
     function buyProduct(uint _index) public payable {
+        Product memory _product = products[_index];
+        require(msg.sender != _product.owner, "You can't buy your own product");
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
-                products[_index].owner,
-                products[_index].price
+                _product.owner,
+                _product.price
             ),
             "Transfer failed."
         );
@@ -118,32 +109,32 @@ contract Marketplace {
 
     // function allow user to store their bought product
     function storeBoughtItem(uint _index) private {
+        Product memory _bProduct = products[_index];
         s_boughtItems[msg.sender].push(
             BoughtItem(
-                products[_index].name,
-                products[_index].image,
-                products[_index].description,
-                products[_index].location,
-                products[_index].price
+                _bProduct.name,
+                _bProduct.image,
+                _bProduct.description,
+                _bProduct.location,
+                _bProduct.price
             )
         );
     }
 
     // function to remove their product out of the marketplace
-    function removeProduct(uint _indexToRemove) public {
-        require(
-            msg.sender == products[_indexToRemove].owner,
-            "You are not the owner"
-        );
+    function removeProduct(
+        uint _indexToRemove
+    ) public onlyOwner(_indexToRemove) {
         delete (products[_indexToRemove]);
     }
 
     // function to update their product's price
-    function updateProduct(uint _indexToUpdate, uint _newPrice) public {
-        require(
-            msg.sender == products[_indexToUpdate].owner,
-            "You are not the owner"
-        );
+    function updateProduct(
+        uint _indexToUpdate,
+        uint _newPrice
+    ) public onlyOwner(_indexToUpdate) {
+        require(_newPrice > 0, "Price is invalid");
+
         products[_indexToUpdate].price = _newPrice;
     }
 
